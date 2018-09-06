@@ -1,5 +1,5 @@
 from .exceptions import *
-
+import random
 
 class GuessAttempt(object):
 
@@ -59,11 +59,59 @@ class HangmanGame(object):
 
     WORD_LIST = ['rmotr', 'python', 'awesome']
 
+    @classmethod
+    def select_random_word(cls, word_list):
+
+        if word_list:
+            return random.choice(word_list)
+        else:
+            raise InvalidListOfWordsException
+
+
     def __init__(self, word_list=WORD_LIST, number_of_guesses=5):
 
-        self.word_list = word_list
-        self.number_of_guesses = number_of_guesses
+        self.word = GuessWord(self.select_random_word(word_list))
+        self.remaining_misses = number_of_guesses
+        self.previous_guesses = []
+        self.finished = False
+        self.won = False
+        self.lost = False
 
-    #@select_random_word
-    def select_random_word(cls):
-        pass
+    def guess(self, guessed_letter):
+
+        if self.finished:
+            raise GameFinishedException
+
+        self.previous_guesses.append(guessed_letter.lower())
+
+        attempt = self.word.perform_attempt(guessed_letter)
+
+        if attempt.is_miss():
+            self.remaining_misses -= 1
+            if self.remaining_misses == 0:
+                self.lost = True
+                self.finished = True
+                raise GameLostException
+
+        elif self.word.answer == self.word.masked:
+            self.won = True
+            self.finished = True
+            raise GameWonException
+
+        return attempt
+
+
+    def is_won(self):
+        return self.won
+
+
+    def is_lost(self):
+        return self.lost
+
+
+    def is_finished(self):
+        return self.finished
+
+
+
+
