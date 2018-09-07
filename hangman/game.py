@@ -68,7 +68,10 @@ class HangmanGame(object):
             raise InvalidListOfWordsException
 
 
-    def __init__(self, word_list=WORD_LIST, number_of_guesses=5):
+    def __init__(self, word_list=None, number_of_guesses=5):
+
+        if not word_list:
+            word_list = HangmanGame.WORD_LIST
 
         self.word = GuessWord(self.select_random_word(word_list))
         self.remaining_misses = number_of_guesses
